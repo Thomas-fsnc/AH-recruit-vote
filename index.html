@@ -215,6 +215,72 @@
       object-fit: cover;
       display: block;
       background: #0f3460;
+      cursor: zoom-in;
+      transition: opacity 0.2s;
+    }
+
+    .image-card img:hover {
+      opacity: 0.85;
+    }
+
+    /* 拡大ヒント */
+    .image-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .zoom-hint {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    /* 拡大モーダル */
+    #image-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.92);
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+
+    #image-modal.open {
+      display: flex;
+    }
+
+    #image-modal img {
+      max-width: 95vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+      cursor: default;
+    }
+
+    #modal-close {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      font-size: 2rem;
+      color: #fff;
+      cursor: pointer;
+      line-height: 1;
+      background: rgba(0, 0, 0, 0.4);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .image-card .vote-btn {
@@ -328,16 +394,28 @@
       好きな方をクリックして投票してください（残り <strong id="remaining-count">10</strong> 回）
     </p>
     <div class="images-container">
-      <div class="image-card" id="card-a" onclick="vote('A')">
-        <img id="img-a" src="" alt="画像A" />
-        <button class="vote-btn">👆 こっちに投票</button>
+      <div class="image-card">
+        <div class="image-wrapper">
+          <img id="img-a" src="" alt="画像A" onclick="openModal(this.src)" />
+          <span class="zoom-hint">🔍 タップで拡大</span>
+        </div>
+        <button class="vote-btn" onclick="vote('A')">👆 こっちに投票</button>
       </div>
       <div class="vs-label">VS</div>
-      <div class="image-card" id="card-b" onclick="vote('B')">
-        <img id="img-b" src="" alt="画像B" />
-        <button class="vote-btn">👆 こっちに投票</button>
+      <div class="image-card">
+        <div class="image-wrapper">
+          <img id="img-b" src="" alt="画像B" onclick="openModal(this.src)" />
+          <span class="zoom-hint">🔍 タップで拡大</span>
+        </div>
+        <button class="vote-btn" onclick="vote('B')">👆 こっちに投票</button>
       </div>
     </div>
+  </div>
+
+  <!-- 拡大モーダル -->
+  <div id="image-modal" onclick="closeModal()">
+    <div id="modal-close" onclick="closeModal()">✕</div>
+    <img id="modal-img" src="" alt="拡大画像" onclick="event.stopPropagation()" />
   </div>
 
   <div id="complete-section">
@@ -536,6 +614,22 @@
       document.getElementById("progress-bar").style.width = "100%";
       document.getElementById("progress-text").textContent = maxVotes + " / " + maxVotes + " 回投票済み";
     }
+
+    // ============================================================
+    // 拡大モーダルの開閉
+    // ============================================================
+    function openModal(src) {
+      document.getElementById("modal-img").src = src;
+      document.getElementById("image-modal").classList.add("open");
+    }
+    function closeModal() {
+      document.getElementById("image-modal").classList.remove("open");
+      document.getElementById("modal-img").src = "";
+    }
+    // ESCキーでも閉じられるようにする
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeModal();
+    });
 
     function showLoading(show) {
       document.getElementById("loading").style.display = show ? "block" : "none";
